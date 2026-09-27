@@ -26,9 +26,7 @@ export const metadata: Metadata = {
     "Asistente conversacional de anime: recomendaciones reales de AniList respondidas en lenguaje natural.",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{ children: React.ReactNode }>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html
       lang="es"
