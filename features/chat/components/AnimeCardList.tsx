@@ -10,10 +10,7 @@ interface AnimeCardListProps {
 
 export function AnimeCardList({ animes }: AnimeCardListProps) {
   return (
-    <ul
-      className="flex list-none gap-3 overflow-x-auto py-2"
-      aria-label="Resultados de anime"
-    >
+    <ul className="flex list-none gap-3 overflow-x-auto py-2" aria-label="Resultados de anime">
       {animes.map((anime, index) => (
         <motion.li
           key={anime.id}
