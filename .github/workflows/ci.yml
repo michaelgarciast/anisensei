@@ -34,6 +34,7 @@ jobs:
             echo "No test files in this snapshot; skipping."
           fi
       - run: bun run lint
+      - run: bunx next typegen
       - run: bunx tsc --noEmit --incremental false
       - run: bun run format:check
       - run: bun run build
