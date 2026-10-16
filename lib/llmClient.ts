@@ -47,7 +47,9 @@ async function withFallback<T>(run: (model: Model) => PromiseLike<T>): Promise<T
       const cooldown = cooldownMs(status, daily);
       if (cooldown) cooldownUntil.set(model.modelId, Date.now() + cooldown);
       const reason = status === 429 ? "cuota agotada" : message.split(/[.\n]/)[0];
-      console.warn(`Modelo ${model.modelId} falló (${status ?? "sin estado"}: ${reason}), probando el siguiente`);
+      console.warn(
+        `Modelo ${model.modelId} falló (${status ?? "sin estado"}: ${reason}), probando el siguiente`,
+      );
     }
   }
   throw lastError;
