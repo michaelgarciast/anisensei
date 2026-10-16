@@ -91,7 +91,7 @@ export function ChatContainer() {
   if (!isLoaded) return null;
 
   return (
-    <div className="relative mx-auto flex h-full w-full max-w-3xl flex-col overflow-hidden bg-background sm:h-[min(92dvh,900px)] sm:rounded-3xl sm:border sm:border-border/60 sm:shadow-2xl sm:shadow-black/10">
+    <div className="relative mx-auto flex h-full w-full max-w-5xl flex-col overflow-hidden bg-background sm:h-[min(94dvh,1100px)] sm:rounded-3xl sm:border sm:border-border/60 sm:shadow-2xl sm:shadow-black/10">
       <header className="sticky top-0 z-10 flex shrink-0 items-center justify-between border-b-2 border-foreground/15 bg-background/70 px-4 py-3 backdrop-blur-xl">
         <div className="flex items-center gap-3">
           <div className="flex size-9 items-center justify-center rounded-lg border-2 border-foreground bg-primary text-primary-foreground shadow-[3px_3px_0_0_var(--foreground)]">
@@ -101,7 +101,7 @@ export function ChatContainer() {
             <h1 className="font-heading text-lg font-bold uppercase leading-tight tracking-wide">
               AniChat
             </h1>
-            <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <p className="hidden items-center gap-1.5 text-xs text-muted-foreground min-[420px]:flex">
               <span className="relative flex size-1.5" aria-hidden>
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
                 <span className="relative inline-flex size-1.5 rounded-full bg-emerald-500" />
@@ -116,7 +116,7 @@ export function ChatContainer() {
         </div>
       </header>
 
-      <div ref={scrollRef} className="relative flex-1 overflow-y-auto px-4 py-6">
+      <div ref={scrollRef} className="relative flex-1 overflow-y-auto scroll-smooth bg-chat-scene px-4 py-8 sm:px-8 [scrollbar-color:var(--border)_transparent] scrollbar-thin [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-track]:bg-transparent">
         {isEmpty ? (
           <motion.div
             initial={{ opacity: 0 }}
@@ -125,6 +125,10 @@ export function ChatContainer() {
           >
             <div className="flex flex-col items-center gap-5">
               <div className="relative">
+                <div
+                  aria-hidden
+                  className="absolute -inset-6 rounded-full bg-primary/15 blur-2xl"
+                />
                 <div
                   aria-hidden
                   className="absolute inset-0 rotate-45 rounded-2xl border-2 border-dashed border-primary/40"
@@ -148,10 +152,15 @@ export function ChatContainer() {
                 </p>
               </div>
             </div>
-            <SuggestionChips onSelect={handleSend} />
+            <div className="flex flex-col items-center gap-3">
+              <p className="font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+                Prueba con
+              </p>
+              <SuggestionChips onSelect={handleSend} />
+            </div>
           </motion.div>
         ) : (
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-6">
             {messages.map((message, index) => (
               <MessageBubble
                 key={message.id}
@@ -165,7 +174,7 @@ export function ChatContainer() {
               <motion.div
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="flex w-fit items-center gap-2 rounded-2xl rounded-bl-sm border-2 border-foreground/15 bg-card px-4 py-2.5 font-mono text-xs uppercase tracking-wide text-muted-foreground shadow-sm"
+                className="ml-12 flex w-fit items-center gap-2 rounded-2xl rounded-bl-sm border-2 border-primary/20 bg-card px-4 py-2.5 font-mono text-xs uppercase tracking-wide text-muted-foreground shadow-sm"
                 role="status"
                 aria-live="polite"
               >
@@ -187,14 +196,14 @@ export function ChatContainer() {
 
       {error && (
         <p
-          className="shrink-0 bg-destructive/10 px-4 py-2 text-center text-xs text-destructive"
+          className="shrink-0 border-t-2 border-destructive/30 bg-destructive/10 px-4 py-2 text-center text-xs font-medium text-destructive"
           role="alert"
         >
           Algo salió mal al generar la respuesta. Intenta de nuevo.
         </p>
       )}
 
-      <div className="shrink-0 px-4 pb-4 pt-2">
+      <div className="shrink-0 border-t border-border/60 bg-background/80 px-4 pb-5 pt-3 backdrop-blur-xl sm:px-8">
         <ChatInput onSend={handleSend} disabled={isBusy} />
       </div>
     </div>

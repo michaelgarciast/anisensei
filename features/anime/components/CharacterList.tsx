@@ -1,5 +1,6 @@
 import Image from "next/image";
 import type { AnimeCharacterEntry } from "../schemas";
+import { DetailSection } from "./DetailSection";
 
 interface CharacterListProps {
   readonly characters: AnimeCharacterEntry[];
@@ -13,26 +14,20 @@ export function CharacterList({ characters, limit = 8 }: CharacterListProps) {
   if (visible.length === 0) return null;
 
   return (
-    <section aria-labelledby="characters-heading" className="space-y-3">
-      <h2 id="characters-heading" className="text-lg font-semibold">
-        Personajes principales
-      </h2>
-      <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+    <DetailSection id="characters-heading" title="Personajes principales">
+      <ul className="grid grid-cols-3 gap-x-3 gap-y-5 sm:grid-cols-4 lg:grid-cols-4">
         {visible.map(({ character, voiceActors }) => {
           const japaneseVA = voiceActors.find((va) => va.language === "Japanese");
           const portrait = character.image.large ?? character.image.medium;
           return (
-            <li
-              key={character.id}
-              className="flex items-center gap-3 overflow-hidden rounded-xl border bg-card p-2"
-            >
-              <div className="relative size-12 shrink-0 overflow-hidden rounded-lg bg-muted">
+            <li key={character.id} className="flex min-w-0 flex-col items-center gap-3 text-center">
+              <div className="relative aspect-square w-full max-w-24 overflow-hidden rounded-full border-2 border-foreground/15 bg-muted shadow-sm sm:max-w-28">
                 {portrait ? (
                   <Image
                     src={portrait}
                     alt={`Imagen de ${character.name.full}`}
                     fill
-                    sizes="48px"
+                    sizes="112px"
                     className="object-cover"
                   />
                 ) : (
@@ -41,14 +36,14 @@ export function CharacterList({ characters, limit = 8 }: CharacterListProps) {
                   </div>
                 )}
               </div>
-              <div className="min-w-0">
+              <div className="w-full">
                 <p className="truncate text-sm font-medium" title={character.name.full}>
                   {character.name.full}
                 </p>
                 {japaneseVA && (
                   <p
                     className="truncate text-xs text-muted-foreground"
-                    title={japaneseVA.name.full}
+                    title={`Voz: ${japaneseVA.name.full}`}
                   >
                     {japaneseVA.name.full}
                   </p>
@@ -58,6 +53,6 @@ export function CharacterList({ characters, limit = 8 }: CharacterListProps) {
           );
         })}
       </ul>
-    </section>
+    </DetailSection>
   );
 }

@@ -87,6 +87,11 @@ export const AnimeSchema = z.object({
   trailer: z
     .object({ id: z.string(), site: z.string(), thumbnail: z.string().nullable() })
     .nullable(),
+  /** Enlaces externos (streaming, webs oficiales…); solo se pide en la consulta de detalle. */
+  externalLinks: z
+    .array(z.object({ url: z.string(), site: z.string() }))
+    .nullable()
+    .optional(),
 });
 
 export type Anime = z.infer<typeof AnimeSchema>;
@@ -214,4 +219,31 @@ export function formatAnimeFormat(format: string | null): string {
     ONE_SHOT: "One shot",
   };
   return format ? (map[format] ?? format) : "Formato desconocido";
+}
+
+const HTML_ENTITIES: Record<string, string> = {
+  "&amp;": "&",
+  "&lt;": "<",
+  "&gt;": ">",
+  "&quot;": '"',
+  "&#39;": "'",
+  "&#039;": "'",
+  "&nbsp;": " ",
+};
+
+export function cleanAnimeDescription(description: string): string {
+  return description
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<[^>]*>/g, "")
+    .replace(/&(?:amp|lt|gt|quot|nbsp|#0?39);/g, (entity) => HTML_ENTITIES[entity])
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+/** URL de un servicio externo (p. ej. Crunchyroll) si AniList la tiene registrada. */
+export function externalLinkUrl(anime: Pick<Anime, "externalLinks">, siteName: string): string | null {
+  const link = anime.externalLinks?.find(
+    (l) => l.site.toLowerCase() === siteName.toLowerCase(),
+  );
+  return link?.url ?? null;
 }

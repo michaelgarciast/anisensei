@@ -52,6 +52,10 @@ const ANIME_DETAIL_QUERY = /* GraphQL */ `
         site
         thumbnail
       }
+      externalLinks {
+        url
+        site
+      }
       recommendations(sort: RATING_DESC, perPage: 8) {
         nodes {
           mediaRecommendation {
@@ -113,6 +117,6 @@ export const getAnimeById = unstable_cache(
 
     return AnimeDetailResponseSchema.parse(raw);
   },
-  ["anime-detail-with-recommendations"],
+  ["anime-detail-with-external-links"],
   { revalidate: 3600 },
 );

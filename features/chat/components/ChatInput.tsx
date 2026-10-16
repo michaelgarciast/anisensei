@@ -15,6 +15,8 @@ export function ChatInput({ onSend, disabled = false }: ChatInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const canSend = !disabled && value.trim().length > 0;
+  const showCounter = value.length > MAX_CHAT_MESSAGE_LENGTH * 0.8;
+  const charsLeft = MAX_CHAT_MESSAGE_LENGTH - value.length;
 
   function autosize() {
     const el = textareaRef.current;
@@ -62,6 +64,16 @@ export function ChatInput({ onSend, disabled = false }: ChatInputProps) {
         aria-label="Mensaje para AniChat"
         className="max-h-40 flex-1 resize-none bg-transparent px-3 py-2 text-sm outline-none placeholder:text-muted-foreground disabled:opacity-60"
       />
+      {showCounter && (
+        <span
+          className={`mb-2.5 shrink-0 font-mono text-[11px] tabular-nums ${
+            charsLeft === 0 ? "font-bold text-destructive" : "text-muted-foreground"
+          }`}
+          aria-live="polite"
+        >
+          {charsLeft}
+        </span>
+      )}
       <Button
         type="submit"
         size="icon"

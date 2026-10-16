@@ -10,7 +10,7 @@ interface AnimeCardListProps {
 
 export function AnimeCardList({ animes }: AnimeCardListProps) {
   return (
-    <ul className="flex list-none gap-3 overflow-x-auto py-2" aria-label="Resultados de anime">
+    <ul className="grid w-full list-none grid-cols-[repeat(auto-fill,10rem)] auto-rows-fr gap-3 py-2" aria-label="Resultados de anime">
       {animes.map((anime, index) => (
         <motion.li
           key={anime.id}
@@ -18,7 +18,7 @@ export function AnimeCardList({ animes }: AnimeCardListProps) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.25, delay: Math.min(index * 0.06, 0.4) }}
         >
-          <AnimeCard anime={anime} />
+          <AnimeCard anime={anime} priority />
         </motion.li>
       ))}
     </ul>

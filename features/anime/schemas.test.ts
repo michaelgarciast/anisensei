@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { AnimeDetailResponseSchema } from "./schemas";
+import { AnimeDetailResponseSchema, cleanAnimeDescription, externalLinkUrl } from "./schemas";
 
 const recommendation = (id: number, type = "ANIME", isAdult = false) => ({
   mediaRecommendation: {
@@ -60,4 +60,22 @@ test("retains only unique, non-adult anime recommendations other than the curren
 test("handles missing recommendations from AniList", () => {
   const result = AnimeDetailResponseSchema.parse({ Media: { ...media, recommendations: null } });
   expect(result.recommendations).toEqual([]);
+});
+
+test("cleanAnimeDescription elimina etiquetas HTML y decodifica entidades", () => {
+  expect(cleanAnimeDescription("Hola <i>mundo</i>.<br><br>Fin &amp; adiós<br/>")).toBe(
+    "Hola mundo.\n\nFin & adiós",
+  );
+});
+
+test("externalLinkUrl devuelve la URL del servicio pedido y es insensible a mayúsculas", () => {
+  const externalLinks = [
+    { url: "https://www.crunchyroll.com/series/abc", site: "Crunchyroll" },
+    { url: "https://example.com", site: "Official Site" },
+  ];
+  expect(externalLinkUrl({ externalLinks }, "crunchyroll")).toBe(
+    "https://www.crunchyroll.com/series/abc",
+  );
+  expect(externalLinkUrl({ externalLinks }, "Netflix")).toBeNull();
+  expect(externalLinkUrl({ externalLinks: null }, "Crunchyroll")).toBeNull();
 });
