@@ -8,6 +8,8 @@ import { interpretIntent } from "@/features/chat/server/interpretIntent";
 import { buildReply } from "@/features/chat/server/buildReply";
 import { searchAnime } from "@/features/anime/server/searchAnime";
 import { getSeasonalAnime } from "@/features/anime/server/getSeasonalAnime";
+import { getAnimeNews } from "@/features/news/server/getAnimeNews";
+import type { NewsItem } from "@/features/news/schemas";
 import type { AnimeSearchResult } from "@/features/anime/schemas";
 import type { ChatIntent } from "@/features/chat/types";
 import { ChatRequestSchema, MAX_CHAT_BODY_BYTES } from "@/features/chat/schemas";
@@ -58,7 +60,7 @@ function buildSearchQuery(intent: ChatIntent): string | undefined {
 // "detail" reutiliza la búsqueda por texto libre: resolver un anime puntual
 // por nombre a su id de AniList queda para una iteración futura.
 async function fetchAnimeForIntent(intent: ChatIntent): Promise<AnimeSearchResult> {
-  if (intent.intent === "smalltalk") return EMPTY_RESULTS;
+  if (intent.intent === "smalltalk" || intent.intent === "news") return EMPTY_RESULTS;
   if (intent.intent === "seasonal") return getSeasonalAnime({ limit: 6 });
 
   return searchAnime({
@@ -104,11 +106,29 @@ export async function POST(req: Request) {
         results = EMPTY_RESULTS;
       }
 
+      let news: NewsItem[] = [];
+      let newsFailed = false;
+      if (intent.intent === "news" || intent.intent === "detail") {
+        try {
+          news = await getAnimeNews({ topic: intent.filters.similarTo });
+        } catch (error) {
+          console.error("No se pudieron obtener noticias:", error);
+          newsFailed = true;
+        }
+      }
+
       if (results.data.length > 0) {
         writer.write({ type: "data-anime-results", id: "anime-results", data: results.data });
       }
 
-      const reply = buildReply({ message: messageText, history, intent, results });
+      const reply = buildReply({
+        message: messageText,
+        history,
+        intent,
+        results,
+        news,
+        newsFailed,
+      });
       writer.merge(toUIMessageStream({ stream: reply.stream }));
     },
   });

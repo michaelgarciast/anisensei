@@ -4,10 +4,11 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { Swords, Trash2 } from "lucide-react";
+import { Swords } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import type { ChatUIMessage } from "../types";
 import { MAX_CHAT_MESSAGE_LENGTH, MAX_CHAT_MESSAGES } from "../schemas";
+import { ClearHistoryDialog } from "./ClearHistoryDialog";
 import { ChatInput } from "./ChatInput";
 import { MessageBubble } from "./MessageBubble";
 import { SuggestionChips } from "./SuggestionChips";
@@ -83,10 +84,8 @@ export function ChatContainer() {
   }
 
   function handleClear() {
-    if (confirm("¿Estás seguro de querer borrar el historial?")) {
-      setMessages([]);
-      localStorage.removeItem(STORAGE_KEY);
-    }
+    setMessages([]);
+    localStorage.removeItem(STORAGE_KEY);
   }
 
   if (!isLoaded) return null;
@@ -113,16 +112,7 @@ export function ChatContainer() {
         </div>
         <div className="flex items-center gap-1">
           <ThemeToggle />
-          {!isEmpty && (
-            <button
-              onClick={handleClear}
-              className="rounded-full p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              title="Borrar historial"
-              aria-label="Borrar historial"
-            >
-              <Trash2 className="size-4" aria-hidden />
-            </button>
-          )}
+          {!isEmpty && <ClearHistoryDialog onConfirm={handleClear} />}
         </div>
       </header>
 
