@@ -116,7 +116,10 @@ export function ChatContainer() {
         </div>
       </header>
 
-      <div ref={scrollRef} className="relative flex-1 overflow-y-auto scroll-smooth bg-chat-scene px-4 py-8 sm:px-8 [scrollbar-color:var(--border)_transparent] scrollbar-thin [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-track]:bg-transparent">
+      <div
+        ref={scrollRef}
+        className="relative flex-1 overflow-y-auto scroll-smooth bg-chat-scene px-4 py-8 sm:px-8 [scrollbar-color:var(--border)_transparent] scrollbar-thin [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-track]:bg-transparent"
+      >
         {isEmpty ? (
           <motion.div
             initial={{ opacity: 0 }}

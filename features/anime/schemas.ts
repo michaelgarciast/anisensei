@@ -241,9 +241,10 @@ export function cleanAnimeDescription(description: string): string {
 }
 
 /** URL de un servicio externo (p. ej. Crunchyroll) si AniList la tiene registrada. */
-export function externalLinkUrl(anime: Pick<Anime, "externalLinks">, siteName: string): string | null {
-  const link = anime.externalLinks?.find(
-    (l) => l.site.toLowerCase() === siteName.toLowerCase(),
-  );
+export function externalLinkUrl(
+  anime: Pick<Anime, "externalLinks">,
+  siteName: string,
+): string | null {
+  const link = anime.externalLinks?.find((l) => l.site.toLowerCase() === siteName.toLowerCase());
   return link?.url ?? null;
 }

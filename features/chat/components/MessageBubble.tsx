@@ -8,24 +8,41 @@ import { AnimeCardList } from "./AnimeCardList";
 
 const markdownComponents: Components = {
   p: ({ children }) => <p className="my-2 first:mt-0 last:mb-0">{children}</p>,
-  ul: ({ children }) => <ul className="my-2 list-disc space-y-1.5 pl-5 marker:text-primary">{children}</ul>,
-  ol: ({ children }) => <ol className="my-2 list-decimal space-y-1.5 pl-5 marker:font-semibold marker:text-primary">{children}</ol>,
+  ul: ({ children }) => (
+    <ul className="my-2 list-disc space-y-1.5 pl-5 marker:text-primary">{children}</ul>
+  ),
+  ol: ({ children }) => (
+    <ol className="my-2 list-decimal space-y-1.5 pl-5 marker:font-semibold marker:text-primary">
+      {children}
+    </ol>
+  ),
   strong: ({ children }) => <strong className="font-semibold text-foreground">{children}</strong>,
   h2: ({ children }) => (
-    <h2 className="mb-1 mt-3 font-heading text-base font-bold uppercase tracking-wide first:mt-0">{children}</h2>
+    <h2 className="mb-1 mt-3 font-heading text-base font-bold uppercase tracking-wide first:mt-0">
+      {children}
+    </h2>
   ),
   h3: ({ children }) => (
-    <h3 className="mb-1 mt-3 font-heading text-sm font-bold uppercase tracking-wide first:mt-0">{children}</h3>
+    <h3 className="mb-1 mt-3 font-heading text-sm font-bold uppercase tracking-wide first:mt-0">
+      {children}
+    </h3>
   ),
   blockquote: ({ children }) => (
-    <blockquote className="my-2 border-l-4 border-primary/40 bg-accent/50 py-1 pl-3 pr-2 italic">{children}</blockquote>
+    <blockquote className="my-2 border-l-4 border-primary/40 bg-accent/50 py-1 pl-3 pr-2 italic">
+      {children}
+    </blockquote>
   ),
   code: ({ children }) => (
     <code className="rounded-md bg-muted px-1.5 py-0.5 font-mono text-xs">{children}</code>
   ),
   hr: () => <hr className="my-3 border-border" />,
   a: ({ children, href }) => (
-    <a href={href} target="_blank" rel="noopener noreferrer" className="font-medium text-primary underline underline-offset-2">
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="font-medium text-primary underline underline-offset-2"
+    >
       {children}
     </a>
   ),
@@ -46,7 +63,9 @@ export function MessageBubble({ message, isStreaming = false }: MessageBubblePro
       transition={{ duration: 0.2 }}
       className={`flex w-full ${isUser ? "justify-end" : "justify-start"}`}
     >
-      <div className={`flex w-full max-w-[92%] gap-3 sm:max-w-[85%] ${isUser ? "justify-end" : "justify-start"}`}>
+      <div
+        className={`flex w-full max-w-[92%] gap-3 sm:max-w-[85%] ${isUser ? "justify-end" : "justify-start"}`}
+      >
         {!isUser && (
           <div className="relative mt-auto shrink-0">
             <div aria-hidden className="absolute -inset-1 rounded-xl bg-primary/25 blur-md" />
@@ -55,7 +74,9 @@ export function MessageBubble({ message, isStreaming = false }: MessageBubblePro
             </div>
           </div>
         )}
-        <div className={`flex min-w-0 flex-1 flex-col gap-1 ${isUser ? "items-end" : "items-start"}`}>
+        <div
+          className={`flex min-w-0 flex-1 flex-col gap-1 ${isUser ? "items-end" : "items-start"}`}
+        >
           {!isUser && (
             <span className="font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
               AniSensei
@@ -87,9 +108,7 @@ export function MessageBubble({ message, isStreaming = false }: MessageBubblePro
               return (
                 <div key={`${message.id}-anime-${index}`} className="w-full">
                   <AnimeCardList animes={part.data} />
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Datos en vivo de AniList
-                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">Datos en vivo de AniList</p>
                 </div>
               );
             }

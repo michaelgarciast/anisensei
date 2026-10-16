@@ -10,7 +10,10 @@ interface AnimeCardListProps {
 
 export function AnimeCardList({ animes }: AnimeCardListProps) {
   return (
-    <ul className="grid w-full list-none grid-cols-[repeat(auto-fill,10rem)] auto-rows-fr gap-3 py-2" aria-label="Resultados de anime">
+    <ul
+      className="grid w-full list-none grid-cols-[repeat(auto-fill,10rem)] auto-rows-fr gap-3 py-2"
+      aria-label="Resultados de anime"
+    >
       {animes.map((anime, index) => (
         <motion.li
           key={anime.id}

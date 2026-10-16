@@ -4,8 +4,10 @@ import { notFound } from "next/navigation";
 import { AnimeDetail } from "@/features/anime/components/AnimeDetail";
 import { getAnimeById } from "@/features/anime/server/getAnimeById";
 import { AniListApiError } from "@/features/anime/server/anilistClient";
-import { cleanAnimeDescription, type AnimeDetail as AnimeDetailData } from "@/features/anime/schemas";
-
+import {
+  cleanAnimeDescription,
+  type AnimeDetail as AnimeDetailData,
+} from "@/features/anime/schemas";
 
 const getAnimeByIdCached = cache(async (id: number): Promise<AnimeDetailData> => {
   const anime = await getAnimeById(id);

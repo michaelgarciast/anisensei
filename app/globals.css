@@ -160,8 +160,20 @@
   background-color: var(--background);
   background-image:
     var(--manga-dot),
-    radial-gradient(ellipse 70% 45% at 50% -12%, color-mix(in oklab, var(--primary) 14%, transparent), transparent),
-    radial-gradient(ellipse 60% 35% at 82% 108%, color-mix(in oklab, var(--accent-foreground) 12%, transparent), transparent),
+    radial-gradient(
+      ellipse 70% 45% at 50% -12%,
+      color-mix(in oklab, var(--primary) 14%, transparent),
+      transparent
+    ),
+    radial-gradient(
+      ellipse 60% 35% at 82% 108%,
+      color-mix(in oklab, var(--accent-foreground) 12%, transparent),
+      transparent
+    ),
     linear-gradient(to bottom, transparent, color-mix(in oklab, var(--accent) 35%, transparent));
-  background-size: 18px 18px, auto, auto, auto;
+  background-size:
+    18px 18px,
+    auto,
+    auto,
+    auto;
 }

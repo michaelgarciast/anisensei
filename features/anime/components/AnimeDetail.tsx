@@ -71,7 +71,7 @@ export function AnimeDetail({ anime }: AnimeDetailProps) {
     <article className="flex w-full flex-col items-center">
       {/* Banner a lo ancho, como en plataformas de streaming */}
       <div className="relative h-48 w-full overflow-hidden sm:h-64 lg:h-72">
-        {banner ?? poster ? (
+        {(banner ?? poster) ? (
           <Image
             src={(banner ?? poster) as string}
             alt=""
@@ -79,9 +79,7 @@ export function AnimeDetail({ anime }: AnimeDetailProps) {
             fill
             priority
             sizes="100vw"
-            className={
-              banner ? "object-cover" : "scale-125 object-cover blur-2xl"
-            }
+            className={banner ? "object-cover" : "scale-125 object-cover blur-2xl"}
           />
         ) : (
           <div
@@ -237,9 +235,14 @@ export function AnimeDetail({ anime }: AnimeDetailProps) {
               )}
               <dl className="divide-y divide-border/60">
                 {infoRows.map(({ label, value }) => (
-                  <div key={label} className="flex items-baseline justify-between gap-4 py-2 text-sm">
+                  <div
+                    key={label}
+                    className="flex items-baseline justify-between gap-4 py-2 text-sm"
+                  >
                     <dt className="shrink-0 text-muted-foreground">{label}</dt>
-                    <dd className="min-w-0 truncate text-right font-medium" title={value}>{value}</dd>
+                    <dd className="min-w-0 truncate text-right font-medium" title={value}>
+                      {value}
+                    </dd>
                   </div>
                 ))}
               </dl>
