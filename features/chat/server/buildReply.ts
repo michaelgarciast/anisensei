@@ -1,6 +1,6 @@
 import "server-only";
 import { streamText, type ModelMessage } from "ai";
-import { llmModel } from "@/lib/llmClient";
+import { llmModel, llmProviderOptions } from "@/lib/llmClient";
 import type { AnimeSearchResult } from "@/features/anime/schemas";
 import type { NewsItem } from "@/features/news/schemas";
 import type { ChatIntent } from "../types";
@@ -80,8 +80,10 @@ ${formatResultsForContext(results)}${
   return streamText({
     model: llmModel,
     maxOutputTokens: 768,
+    providerOptions: llmProviderOptions,
     timeout: { totalMs: 12_000 },
-    system: SYSTEM_PROMPT,
+    maxRetries: 0,
+    system: `${SYSTEM_PROMPT}\n\nFecha actual: ${new Date().toLocaleDateString("es", { dateStyle: "long" })}. Tu conocimiento interno puede estar desactualizado; los datos de AniList y las noticias del contexto son más recientes y tienen prioridad.`,
     messages: [
       ...history,
       { role: "user", content: `${message}\n\n[Contexto interno]\n${context}` },

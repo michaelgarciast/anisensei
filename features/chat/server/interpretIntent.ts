@@ -1,8 +1,14 @@
 import "server-only";
 import { generateText, Output, type ModelMessage } from "ai";
-import { llmModel } from "@/lib/llmClient";
+import { llmModel, llmProviderOptions } from "@/lib/llmClient";
 import { ChatIntentSchema } from "../schemas";
 import type { ChatIntent } from "../types";
+
+function currentDateNote(): string {
+  const now = new Date();
+  const date = now.toLocaleDateString("es", { dateStyle: "long" });
+  return `Fecha actual: ${date}. El año actual es ${now.getFullYear()}. Usa "year" solo si el usuario menciona un año o dice "este año" (en ese caso, ${now.getFullYear()}); nunca inventes un año.`;
+}
 
 const SYSTEM_PROMPT = `Eres el módulo de interpretación de intención de AniChat, un asistente conversacional de anime.
 
@@ -14,7 +20,7 @@ Tu ÚNICA responsabilidad es leer el mensaje del usuario (y el historial de la c
 
 Reglas estrictas:
 - Solo interpretas intención y tono; no redactas la respuesta final para el usuario.
-- Si el usuario pregunta por el ESTADO ACTUAL de un anime concreto (en qué temporada está, si sigue en emisión, si ya terminó, cuántos episodios tiene, si hay nueva temporada, cuándo sale), clasifícalo como "detail" y pon el título del anime en "similarTo". Estos datos cambian con el tiempo, así que NUNCA los clasifiques como "smalltalk".
+- Si el usuario pregunta por el ESTADO ACTUAL de un anime concreto (en qué temporada está, si sigue en emisión, si ya terminó, cuántos episodios tiene, si hay nueva temporada, cuándo sale), clasifícalo como "detail" y pon el título del anime en "similarTo". En ese caso deja "genre", "mood" y "year" sin definir (solo "similarTo"). Estos datos cambian con el tiempo, así que NUNCA los clasifiques como "smalltalk".
 - PARA OPTIMIZAR LA VELOCIDAD: Si la pregunta es solo sobre el autor, cuántas OVAs tiene, creadores o curiosidades de una serie que no requieren traer una lista de resultados visuales, clasifícalo como "smalltalk". De esa forma el asistente responderá instantáneamente con su conocimiento interno sin hacer llamadas lentas a la base de datos. Solo usa "search" o "detail" si el usuario necesita ver tarjetas visuales de animes.`;
 
 export interface InterpretIntentInput {
@@ -28,10 +34,12 @@ export async function interpretIntent({
 }: InterpretIntentInput): Promise<ChatIntent> {
   const { output } = await generateText({
     model: llmModel,
-    maxOutputTokens: 256,
+    maxOutputTokens: 512,
+    providerOptions: llmProviderOptions,
     timeout: 8_000,
+    maxRetries: 0,
     output: Output.object({ schema: ChatIntentSchema }),
-    system: SYSTEM_PROMPT,
+    system: `${SYSTEM_PROMPT}\n\n${currentDateNote()}`,
     messages: [...history, { role: "user", content: message }],
   });
 
