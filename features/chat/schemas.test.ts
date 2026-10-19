@@ -1,5 +1,10 @@
 import { describe, expect, test } from "bun:test";
-import { ChatRequestSchema, MAX_CHAT_MESSAGE_LENGTH, MAX_CHAT_MESSAGES } from "./schemas";
+import {
+  ChatIntentSchema,
+  ChatRequestSchema,
+  MAX_CHAT_MESSAGE_LENGTH,
+  MAX_CHAT_MESSAGES,
+} from "./schemas";
 
 const message = (role: string, text: string) => ({ role, parts: [{ type: "text", text }] });
 
@@ -41,6 +46,21 @@ describe("ChatRequestSchema", () => {
       ChatRequestSchema.safeParse({
         messages: Array.from({ length: MAX_CHAT_MESSAGES + 1 }, () => message("user", "a")),
       }).success,
+    ).toBe(false);
+  });
+});
+
+describe("ChatIntentSchema", () => {
+  const base = { intent: "search", tone: "casual" };
+
+  test("accepts optional AniList tags and rejects more than four", () => {
+    expect(
+      ChatIntentSchema.safeParse({ ...base, filters: { tags: ["Time Travel", "Psychological"] } })
+        .success,
+    ).toBe(true);
+    expect(ChatIntentSchema.safeParse({ ...base, filters: {} }).success).toBe(true);
+    expect(
+      ChatIntentSchema.safeParse({ ...base, filters: { tags: ["a", "b", "c", "d", "e"] } }).success,
     ).toBe(false);
   });
 });
