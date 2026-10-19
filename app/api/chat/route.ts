@@ -68,6 +68,10 @@ async function fetchAnimeForIntent(intent: ChatIntent): Promise<AnimeSearchResul
     genre: intent.filters.genre,
     year: intent.filters.year,
     tags: intent.filters.tags,
+    sort: intent.filters.sort,
+    format: intent.filters.format,
+    minScore: intent.filters.minScore,
+    maxEpisodes: intent.filters.maxEpisodes,
     sortByMatch: intent.intent === "detail",
     limit: intent.intent === "detail" ? 3 : 6,
   });

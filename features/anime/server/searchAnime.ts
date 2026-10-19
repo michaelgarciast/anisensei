@@ -11,10 +11,21 @@ export interface SearchAnimeFilters {
   tags?: string[];
   /** Prioriza la coincidencia con el texto (p. ej. al resolver un anime concreto). */
   sortByMatch?: boolean;
+  sort?: "trending" | "score" | "popularity";
+  format?: "TV" | "MOVIE" | "OVA" | "ONA" | "SPECIAL";
+  /** Puntaje mínimo en escala 0-100 de AniList. */
+  minScore?: number;
+  maxEpisodes?: number;
   status?: "airing" | "complete" | "upcoming";
   page?: number;
   limit?: number;
 }
+
+const ANILIST_SORT: Record<NonNullable<SearchAnimeFilters["sort"]>, string> = {
+  trending: "TRENDING_DESC",
+  score: "SCORE_DESC",
+  popularity: "POPULARITY_DESC",
+};
 
 const ANILIST_STATUS: Record<NonNullable<SearchAnimeFilters["status"]>, string> = {
   airing: "RELEASING",
@@ -28,6 +39,9 @@ const SEARCH_ANIME_QUERY = /* GraphQL */ `
     $genre: String
     $tags: [String]
     $sort: [MediaSort]
+    $format: MediaFormat
+    $minScore: Int
+    $maxEpisodes: Int
     $seasonYear: Int
     $status: MediaStatus
     $page: Int
@@ -46,6 +60,9 @@ const SEARCH_ANIME_QUERY = /* GraphQL */ `
         search: $search
         genre: $genre
         tag_in: $tags
+        format: $format
+        averageScore_greater: $minScore
+        episodes_lesser: $maxEpisodes
         seasonYear: $seasonYear
         status: $status
         sort: $sort
@@ -115,7 +132,14 @@ export const searchAnime = unstable_cache(
         search: filters.query,
         genre: filters.genre,
         tags: filters.tags?.length ? filters.tags : undefined,
-        sort: filters.sortByMatch && filters.query ? ["SEARCH_MATCH"] : ["POPULARITY_DESC"],
+        sort: [
+          filters.sortByMatch && filters.query
+            ? "SEARCH_MATCH"
+            : ANILIST_SORT[filters.sort ?? "popularity"],
+        ],
+        format: filters.format,
+        minScore: filters.minScore,
+        maxEpisodes: filters.maxEpisodes ? filters.maxEpisodes + 1 : undefined,
         seasonYear: filters.year,
         status: filters.status ? ANILIST_STATUS[filters.status] : undefined,
         page: filters.page ?? 1,

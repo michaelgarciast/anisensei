@@ -8,6 +8,10 @@ export const ChatIntentSchema = z.object({
     tags: z.array(z.string()).max(4).optional(),
     similarTo: z.string().optional(),
     year: z.number().optional(),
+    sort: z.enum(["trending", "score", "popularity"]).optional(),
+    format: z.enum(["TV", "MOVIE", "OVA", "ONA", "SPECIAL"]).optional(),
+    minScore: z.number().int().min(1).max(100).optional(),
+    maxEpisodes: z.number().int().min(1).optional(),
   }),
   tone: z.enum(["casual", "hype", "informative"]),
 });

@@ -63,4 +63,13 @@ describe("ChatIntentSchema", () => {
       ChatIntentSchema.safeParse({ ...base, filters: { tags: ["a", "b", "c", "d", "e"] } }).success,
     ).toBe(false);
   });
+
+  test("validates sort, format and numeric bounds", () => {
+    const parse = (filters: object) => ChatIntentSchema.safeParse({ ...base, filters }).success;
+    expect(parse({ sort: "trending", format: "MOVIE", minScore: 75, maxEpisodes: 13 })).toBe(true);
+    expect(parse({ sort: "random" })).toBe(false);
+    expect(parse({ format: "MANGA" })).toBe(false);
+    expect(parse({ minScore: 101 })).toBe(false);
+    expect(parse({ maxEpisodes: 0 })).toBe(false);
+  });
 });
