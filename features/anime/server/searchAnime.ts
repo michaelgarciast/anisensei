@@ -7,6 +7,10 @@ export interface SearchAnimeFilters {
   /** Nombre de género de AniList en inglés, p. ej. "Action", "Romance" */
   genre?: string;
   year?: number;
+  /** Nombres de tags de AniList en inglés, p. ej. "Time Travel", "Iyashikei" */
+  tags?: string[];
+  /** Prioriza la coincidencia con el texto (p. ej. al resolver un anime concreto). */
+  sortByMatch?: boolean;
   status?: "airing" | "complete" | "upcoming";
   page?: number;
   limit?: number;
@@ -22,6 +26,8 @@ const SEARCH_ANIME_QUERY = /* GraphQL */ `
   query SearchAnime(
     $search: String
     $genre: String
+    $tags: [String]
+    $sort: [MediaSort]
     $seasonYear: Int
     $status: MediaStatus
     $page: Int
@@ -39,9 +45,10 @@ const SEARCH_ANIME_QUERY = /* GraphQL */ `
         type: ANIME
         search: $search
         genre: $genre
+        tag_in: $tags
         seasonYear: $seasonYear
         status: $status
-        sort: [POPULARITY_DESC]
+        sort: $sort
         isAdult: false
       ) {
         id
@@ -91,6 +98,10 @@ const SEARCH_ANIME_QUERY = /* GraphQL */ `
           site
           thumbnail
         }
+        nextAiringEpisode {
+          episode
+          airingAt
+        }
       }
     }
   }
@@ -103,6 +114,8 @@ export const searchAnime = unstable_cache(
       variables: {
         search: filters.query,
         genre: filters.genre,
+        tags: filters.tags?.length ? filters.tags : undefined,
+        sort: filters.sortByMatch && filters.query ? ["SEARCH_MATCH"] : ["POPULARITY_DESC"],
         seasonYear: filters.year,
         status: filters.status ? ANILIST_STATUS[filters.status] : undefined,
         page: filters.page ?? 1,

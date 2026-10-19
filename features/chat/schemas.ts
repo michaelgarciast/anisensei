@@ -5,6 +5,7 @@ export const ChatIntentSchema = z.object({
   filters: z.object({
     genre: z.string().optional(),
     mood: z.string().optional(),
+    tags: z.array(z.string()).max(4).optional(),
     similarTo: z.string().optional(),
     year: z.number().optional(),
   }),

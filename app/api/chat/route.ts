@@ -57,8 +57,7 @@ function buildSearchQuery(intent: ChatIntent): string | undefined {
 }
 
 // Resuelve qué llamada a AniList corresponde según la intención detectada.
-// "detail" reutiliza la búsqueda por texto libre: resolver un anime puntual
-// por nombre a su id de AniList queda para una iteración futura.
+// "detail" reutiliza la búsqueda por texto ordenada por coincidencia con el título.
 async function fetchAnimeForIntent(intent: ChatIntent): Promise<AnimeSearchResult> {
   if (intent.intent === "smalltalk" || intent.intent === "news") return EMPTY_RESULTS;
   if (intent.intent === "seasonal") return getSeasonalAnime({ limit: 6 });
@@ -67,7 +66,9 @@ async function fetchAnimeForIntent(intent: ChatIntent): Promise<AnimeSearchResul
     query: buildSearchQuery(intent),
     genre: intent.filters.genre,
     year: intent.filters.year,
-    limit: 6,
+    tags: intent.filters.tags,
+    sortByMatch: intent.intent === "detail",
+    limit: intent.intent === "detail" ? 3 : 6,
   });
 }
 
