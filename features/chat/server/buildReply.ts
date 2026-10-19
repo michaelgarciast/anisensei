@@ -1,7 +1,7 @@
 import "server-only";
 import { streamText, type ModelMessage } from "ai";
 import { llmModel, llmProviderOptions } from "@/lib/llmClient";
-import type { AnimeSearchResult } from "@/features/anime/schemas";
+import type { AnimeDetail, AnimeSearchResult } from "@/features/anime/schemas";
 import type { NewsItem } from "@/features/news/schemas";
 import type { ChatIntent } from "../types";
 
@@ -19,6 +19,7 @@ Reglas:
 - Adapta el tono de tu redacción al valor de "tone" que se te indique.
 - No repitas la lista completa de datos de AniList en texto; asume que el usuario las está viendo visualmente.
 - Si la intención es "news", responde SOLO con los titulares de "Noticias recientes" del contexto: resúmelos, menciona el medio y la fecha, e incluye el enlace en formato markdown. No inventes noticias ni detalles que no estén en los titulares. Si no hay titulares o fallaron, dilo con honestidad y no presentes conocimiento interno como noticia actual.
+- Si hay "Detalle de AniList", úsalo para responder "qué ver después", orden de visionado (precuelas/secuelas) y series recomendadas; no inventes entradas que no estén ahí.
 - Si el usuario busca recomendaciones parecidas a una obra, nombra las series que consideres similares usando tu conocimiento, y si coinciden con los resultados de AniList, mucho mejor.`;
 
 export interface BuildReplyInput {
@@ -28,6 +29,7 @@ export interface BuildReplyInput {
   results: AnimeSearchResult;
   news?: NewsItem[];
   newsFailed?: boolean;
+  detail?: AnimeDetail;
 }
 
 function formatResultsForContext(results: AnimeSearchResult): string {
@@ -50,6 +52,16 @@ function formatResultsForContext(results: AnimeSearchResult): string {
     .join("\n");
 }
 
+function formatDetailForContext(detail: AnimeDetail): string {
+  const name = (a: { title: { english: string | null; romaji: string } }) =>
+    a.title.english ?? a.title.romaji;
+  const relations = detail.relations
+    .map((r) => `${r.relationType}: ${name(r)} (${r.seasonYear ?? "?"}, ${r.format ?? "?"})`)
+    .join("; ");
+  const recommendations = detail.recommendations.map(name).join("; ");
+  return `Anime principal: ${name(detail)}\nRelacionados (orden de visionado): ${relations || "ninguno"}\nRecomendados por la comunidad: ${recommendations || "ninguno"}`;
+}
+
 function formatNewsForContext(news: NewsItem[], failed: boolean): string {
   if (failed) return "No se pudieron obtener noticias (fuente no disponible).";
   if (news.length === 0) return "Sin noticias recientes.";
@@ -68,6 +80,7 @@ export function buildReply({
   results,
   news = [],
   newsFailed = false,
+  detail,
 }: BuildReplyInput) {
   const context = `Intención detectada: ${intent.intent}
 Tono solicitado: ${intent.tone}
@@ -75,6 +88,8 @@ Filtros: ${JSON.stringify(intent.filters)}
 
 Resultados de AniList:
 ${formatResultsForContext(results)}${
+    detail ? `\n\nDetalle de AniList:\n${formatDetailForContext(detail)}` : ""
+  }${
     intent.intent === "news" || intent.intent === "detail"
       ? `\n\nNoticias recientes (Google News):\n${formatNewsForContext(news, newsFailed)}`
       : ""

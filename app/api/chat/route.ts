@@ -8,9 +8,10 @@ import { interpretIntent } from "@/features/chat/server/interpretIntent";
 import { buildReply } from "@/features/chat/server/buildReply";
 import { searchAnime } from "@/features/anime/server/searchAnime";
 import { getSeasonalAnime } from "@/features/anime/server/getSeasonalAnime";
+import { getAnimeById } from "@/features/anime/server/getAnimeById";
 import { getAnimeNews } from "@/features/news/server/getAnimeNews";
 import type { NewsItem } from "@/features/news/schemas";
-import type { AnimeSearchResult } from "@/features/anime/schemas";
+import type { AnimeDetail, AnimeSearchResult } from "@/features/anime/schemas";
 import type { ChatIntent } from "@/features/chat/types";
 import { ChatRequestSchema, MAX_CHAT_BODY_BYTES } from "@/features/chat/schemas";
 
@@ -118,6 +119,15 @@ export async function POST(req: Request) {
         }
       }
 
+      let detail: AnimeDetail | undefined;
+      if (intent.intent === "detail" && results.data.length > 0) {
+        try {
+          detail = await getAnimeById(results.data[0].id);
+        } catch (error) {
+          console.error("No se pudo obtener el detalle de AniList:", error);
+        }
+      }
+
       if (results.data.length > 0) {
         writer.write({ type: "data-anime-results", id: "anime-results", data: results.data });
       }
@@ -129,6 +139,7 @@ export async function POST(req: Request) {
         results,
         news,
         newsFailed,
+        detail,
       });
       writer.merge(toUIMessageStream({ stream: reply.stream }));
     },
