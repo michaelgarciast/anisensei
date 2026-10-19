@@ -6,6 +6,7 @@ const SUGGESTIONS = [
   "Animes de este año",
   "Parecidos a Death Note",
   "¿Qué hay de temporada ahora?",
+  "¿Qué episodios salen hoy?",
   "Un shonen hype para maratonear",
 ] as const;
 

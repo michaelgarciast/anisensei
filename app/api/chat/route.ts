@@ -9,6 +9,7 @@ import { buildReply } from "@/features/chat/server/buildReply";
 import { searchAnime } from "@/features/anime/server/searchAnime";
 import { getSeasonalAnime } from "@/features/anime/server/getSeasonalAnime";
 import { getAnimeById } from "@/features/anime/server/getAnimeById";
+import { getAiringToday } from "@/features/anime/server/getAiringToday";
 import { getAnimeNews } from "@/features/news/server/getAnimeNews";
 import type { NewsItem } from "@/features/news/schemas";
 import type { AnimeDetail, AnimeSearchResult } from "@/features/anime/schemas";
@@ -61,6 +62,7 @@ function buildSearchQuery(intent: ChatIntent): string | undefined {
 // "detail" reutiliza la búsqueda por texto ordenada por coincidencia con el título.
 async function fetchAnimeForIntent(intent: ChatIntent): Promise<AnimeSearchResult> {
   if (intent.intent === "smalltalk" || intent.intent === "news") return EMPTY_RESULTS;
+  if (intent.intent === "airing") return getAiringToday({ limit: 6 });
   if (intent.intent === "seasonal") return getSeasonalAnime({ limit: 6 });
 
   return searchAnime({

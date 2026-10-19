@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const ChatIntentSchema = z.object({
-  intent: z.enum(["search", "seasonal", "detail", "news", "smalltalk"]),
+  intent: z.enum(["search", "seasonal", "airing", "detail", "news", "smalltalk"]),
   filters: z.object({
     genre: z.string().optional(),
     mood: z.string().optional(),

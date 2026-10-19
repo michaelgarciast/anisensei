@@ -152,7 +152,18 @@ const AnimeRelationEdgeSchema = z.object({
 
 const ORDER_RELATIONS = ["PREQUEL", "SEQUEL", "PARENT", "SIDE_STORY", "SPIN_OFF", "ALTERNATIVE"];
 
+const AnimeStaffEdgeSchema = z.object({
+  role: z.string().nullable(),
+  node: z.object({ name: z.object({ full: z.string().nullable() }) }).nullable(),
+});
+
+const KEY_STAFF_ROLE = /^(Director|Original Creator|Original Story|Series Composition|Music)\b/i;
+
 export const AnimeDetailMediaSchema = AnimeSchema.extend({
+  staff: z
+    .object({ edges: z.array(AnimeStaffEdgeSchema.nullable()) })
+    .nullable()
+    .optional(),
   relations: z
     .object({ edges: z.array(AnimeRelationEdgeSchema.nullable()) })
     .nullable()
@@ -168,6 +179,7 @@ export const AnimeDetailResponseSchema = z
       characters: connection,
       recommendations: recommendationConnection,
       relations: relationConnection,
+      staff: staffConnection,
       ...animeFields
     } = Media;
     const characters: AnimeCharacterEntry[] = connection.edges.map((edge) => ({
@@ -198,7 +210,12 @@ export const AnimeDetailResponseSchema = z
         ? [{ relationType: edge.relationType, ...edge.node }]
         : [],
     );
-    return { ...animeFields, characters, recommendations, relations };
+    const staff = (staffConnection?.edges ?? []).flatMap((edge) =>
+      edge?.role && edge.node?.name.full && KEY_STAFF_ROLE.test(edge.role)
+        ? [{ role: edge.role, name: edge.node.name.full }]
+        : [],
+    );
+    return { ...animeFields, characters, recommendations, relations, staff };
   });
 
 export type AnimeDetail = z.infer<typeof AnimeDetailResponseSchema>;

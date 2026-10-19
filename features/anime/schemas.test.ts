@@ -123,3 +123,27 @@ test("formatNextEpisode muestra la cuenta regresiva en d/h/min", () => {
   expect(formatNextEpisode(at(2 * 3600 + 5 * 60), now)).toBe("Ep. 5 · en 2 h 5 min");
   expect(formatNextEpisode(at(-10), now)).toBe("Ep. 5 · en 0 min");
 });
+
+test("retains only key staff roles with a name", () => {
+  const edge = (role: string | null, full: string | null) => ({ role, node: { name: { full } } });
+  const result = AnimeDetailResponseSchema.parse({
+    Media: {
+      ...media,
+      recommendations: null,
+      staff: {
+        edges: [
+          null,
+          edge("Director", "Ana"),
+          edge("Key Animation", "Beto"),
+          edge("Original Creator", "Caro"),
+          edge("Music", null),
+          { role: "Director", node: null },
+        ],
+      },
+    },
+  });
+  expect(result.staff).toEqual([
+    { role: "Director", name: "Ana" },
+    { role: "Original Creator", name: "Caro" },
+  ]);
+});
