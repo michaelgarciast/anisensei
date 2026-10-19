@@ -60,6 +60,16 @@ const ANIME_DETAIL_QUERY = /* GraphQL */ `
         url
         site
       }
+      staff(perPage: 12, sort: RELEVANCE) {
+        edges {
+          role
+          node {
+            name {
+              full
+            }
+          }
+        }
+      }
       relations {
         edges {
           relationType(version: 2)
@@ -138,6 +148,6 @@ export const getAnimeById = unstable_cache(
 
     return AnimeDetailResponseSchema.parse(raw);
   },
-  ["anime-detail-with-relations"],
+  ["anime-detail-with-staff"],
   { revalidate: 3600 },
 );
