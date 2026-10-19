@@ -80,7 +80,7 @@ Abre `http://localhost:3000`. `.env.local` está excluido de Git; nunca publique
 
 ## Despliegue
 
-La aplicación puede desplegarse en Vercel configurando `GOOGLE_GENERATIVE_AI_API_KEY` en las variables de entorno del proyecto. El endpoint `/api/chat` tiene una regla de limitación de solicitudes por IP publicada en Vercel Firewall. La regla vive en el dashboard de Vercel, no en este repositorio, así que hay que recrearla al desplegar en otro proyecto. Los límites de tamaño del cuerpo no sustituyen un límite de frecuencia.
+La aplicación puede desplegarse en Vercel configurando `GOOGLE_GENERATIVE_AI_API_KEY` en las variables de entorno del proyecto. El endpoint `/api/chat` tiene una regla de limitación de solicitudes por IP publicada en Vercel Firewall con la acción Deny, que bloquea las peticiones que superan el límite. La regla vive en el dashboard de Vercel, no en este repositorio, así que hay que recrearla al desplegar en otro proyecto. Los límites de tamaño del cuerpo no sustituyen un límite de frecuencia.
 
 ## Estado del proyecto
 
