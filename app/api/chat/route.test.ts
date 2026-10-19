@@ -26,6 +26,11 @@ mock.module("@/features/chat/server/interpretIntent", () => ({
 mock.module("@/features/chat/server/buildReply", () => ({ buildReply }));
 mock.module("@/features/anime/server/searchAnime", () => ({ searchAnime }));
 mock.module("@/features/anime/server/getSeasonalAnime", () => ({ getSeasonalAnime }));
+const getAiringToday = mock<(options: unknown) => Promise<typeof empty>>(async () => ({
+  ...empty,
+  data: [anime],
+}));
+mock.module("@/features/anime/server/getAiringToday", () => ({ getAiringToday }));
 mock.module("@/features/anime/server/getAnimeById", () => ({ getAnimeById }));
 
 const { POST } = await import("./route");
@@ -56,7 +61,8 @@ afterAll(() => {
 });
 
 beforeEach(() => {
-  for (const fn of [searchAnime, getSeasonalAnime, getAnimeById, buildReply]) fn.mockClear();
+  for (const fn of [searchAnime, getSeasonalAnime, getAiringToday, getAnimeById, buildReply])
+    fn.mockClear();
 });
 
 describe("POST /api/chat", () => {
@@ -108,6 +114,13 @@ describe("POST /api/chat", () => {
     intent = { intent: "seasonal", tone: "hype", filters: {} };
     await request();
     expect(getSeasonalAnime).toHaveBeenCalledTimes(1);
+    expect(searchAnime).not.toHaveBeenCalled();
+  });
+
+  test("airing intent uses the airing schedule query", async () => {
+    intent = { intent: "airing", tone: "hype", filters: {} };
+    await request();
+    expect(getAiringToday).toHaveBeenCalledTimes(1);
     expect(searchAnime).not.toHaveBeenCalled();
   });
 
