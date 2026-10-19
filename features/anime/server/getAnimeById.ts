@@ -60,6 +60,23 @@ const ANIME_DETAIL_QUERY = /* GraphQL */ `
         url
         site
       }
+      relations {
+        edges {
+          relationType(version: 2)
+          node {
+            id
+            type
+            format
+            status
+            seasonYear
+            title {
+              romaji
+              english
+              native
+            }
+          }
+        }
+      }
       recommendations(sort: RATING_DESC, perPage: 8) {
         nodes {
           mediaRecommendation {
@@ -121,6 +138,6 @@ export const getAnimeById = unstable_cache(
 
     return AnimeDetailResponseSchema.parse(raw);
   },
-  ["anime-detail-with-airing"],
+  ["anime-detail-with-relations"],
   { revalidate: 3600 },
 );

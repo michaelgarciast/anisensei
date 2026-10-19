@@ -88,10 +88,7 @@ export const AnimeSchema = z.object({
     .object({ id: z.string(), site: z.string(), thumbnail: z.string().nullable() })
     .nullable(),
   /** Próximo episodio por emitir (airingAt en segundos UNIX); null si no está en emisión. */
-  nextAiringEpisode: z
-    .object({ episode: z.number(), airingAt: z.number() })
-    .nullable()
-    .optional(),
+  nextAiringEpisode: z.object({ episode: z.number(), airingAt: z.number() }).nullable().optional(),
   /** Enlaces externos (streaming, webs oficiales…); solo se pide en la consulta de detalle. */
   externalLinks: z
     .array(z.object({ url: z.string(), site: z.string() }))
@@ -146,7 +143,20 @@ const RecommendationsConnectionSchema = z.object({
   ),
 });
 
+const AnimeRelationEdgeSchema = z.object({
+  relationType: z.string().nullable(),
+  node: AnimeSchema.pick({ id: true, title: true, format: true, status: true, seasonYear: true })
+    .extend({ type: z.string().nullable() })
+    .nullable(),
+});
+
+const ORDER_RELATIONS = ["PREQUEL", "SEQUEL", "PARENT", "SIDE_STORY", "SPIN_OFF", "ALTERNATIVE"];
+
 export const AnimeDetailMediaSchema = AnimeSchema.extend({
+  relations: z
+    .object({ edges: z.array(AnimeRelationEdgeSchema.nullable()) })
+    .nullable()
+    .optional(),
   characters: CharactersConnectionSchema,
   recommendations: RecommendationsConnectionSchema.nullable(),
 });
@@ -157,6 +167,7 @@ export const AnimeDetailResponseSchema = z
     const {
       characters: connection,
       recommendations: recommendationConnection,
+      relations: relationConnection,
       ...animeFields
     } = Media;
     const characters: AnimeCharacterEntry[] = connection.edges.map((edge) => ({
@@ -180,7 +191,14 @@ export const AnimeDetailResponseSchema = z
           return [anime];
         })
         .slice(0, 6) ?? [];
-    return { ...animeFields, characters, recommendations };
+    const relations = (relationConnection?.edges ?? []).flatMap((edge) =>
+      edge?.node?.type === "ANIME" &&
+      edge.relationType &&
+      ORDER_RELATIONS.includes(edge.relationType)
+        ? [{ relationType: edge.relationType, ...edge.node }]
+        : [],
+    );
+    return { ...animeFields, characters, recommendations, relations };
   });
 
 export type AnimeDetail = z.infer<typeof AnimeDetailResponseSchema>;
