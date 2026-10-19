@@ -1,5 +1,10 @@
 import { describe, expect, test } from "bun:test";
-import { ChatRequestSchema, MAX_CHAT_MESSAGE_LENGTH, MAX_CHAT_MESSAGES } from "./schemas";
+import {
+  ChatIntentSchema,
+  ChatRequestSchema,
+  MAX_CHAT_MESSAGE_LENGTH,
+  MAX_CHAT_MESSAGES,
+} from "./schemas";
 
 const message = (role: string, text: string) => ({ role, parts: [{ type: "text", text }] });
 
@@ -42,5 +47,29 @@ describe("ChatRequestSchema", () => {
         messages: Array.from({ length: MAX_CHAT_MESSAGES + 1 }, () => message("user", "a")),
       }).success,
     ).toBe(false);
+  });
+});
+
+describe("ChatIntentSchema", () => {
+  const base = { intent: "search", tone: "casual" };
+
+  test("accepts optional AniList tags and rejects more than four", () => {
+    expect(
+      ChatIntentSchema.safeParse({ ...base, filters: { tags: ["Time Travel", "Psychological"] } })
+        .success,
+    ).toBe(true);
+    expect(ChatIntentSchema.safeParse({ ...base, filters: {} }).success).toBe(true);
+    expect(
+      ChatIntentSchema.safeParse({ ...base, filters: { tags: ["a", "b", "c", "d", "e"] } }).success,
+    ).toBe(false);
+  });
+
+  test("validates sort, format and numeric bounds", () => {
+    const parse = (filters: object) => ChatIntentSchema.safeParse({ ...base, filters }).success;
+    expect(parse({ sort: "trending", format: "MOVIE", minScore: 75, maxEpisodes: 13 })).toBe(true);
+    expect(parse({ sort: "random" })).toBe(false);
+    expect(parse({ format: "MANGA" })).toBe(false);
+    expect(parse({ minScore: 101 })).toBe(false);
+    expect(parse({ maxEpisodes: 0 })).toBe(false);
   });
 });

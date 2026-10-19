@@ -2,9 +2,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { Star } from "lucide-react";
 import type { Anime } from "../schemas";
+import { NextEpisodeBadge } from "./NextEpisodeBadge";
 
 interface AnimeCardProps {
-  readonly anime: Pick<Anime, "id" | "title" | "coverImage" | "averageScore" | "genres">;
+  readonly anime: Pick<Anime, "id" | "title" | "coverImage" | "averageScore" | "genres"> &
+    Partial<Pick<Anime, "nextAiringEpisode">>;
   /** true si la tarjeta aparece above the fold (p. ej. primeras del chat): carga ansiosa para el LCP. */
   readonly priority?: boolean;
 }
@@ -59,6 +61,7 @@ export function AnimeCard({ anime, priority = false }: AnimeCardProps) {
         <p className="line-clamp-2 min-h-[2.4em] text-sm font-semibold leading-tight transition-colors group-hover:text-primary">
           {title}
         </p>
+        <NextEpisodeBadge next={anime.nextAiringEpisode} />
         {genres.length > 0 && (
           <div className="flex flex-wrap gap-1">
             {genres.map((genre) => (

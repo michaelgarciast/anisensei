@@ -1,7 +1,7 @@
 import "server-only";
 import { streamText, type ModelMessage } from "ai";
 import { llmModel, llmProviderOptions } from "@/lib/llmClient";
-import type { AnimeSearchResult } from "@/features/anime/schemas";
+import type { AnimeDetail, AnimeSearchResult } from "@/features/anime/schemas";
 import type { NewsItem } from "@/features/news/schemas";
 import type { ChatIntent } from "../types";
 
@@ -13,12 +13,13 @@ Tienes dos fuentes de conocimiento:
 
 Reglas:
 - Si el usuario hace preguntas sobre autores, estudios, creadores, OVAs, curiosidades o animes similares a uno específico, USA TU CONOCIMIENTO INTERNO para responderle detalladamente de forma útil y amigable.
-- Para preguntas sobre el estado, temporada, emisión o episodios de un anime, responde con los datos de AniList del contexto (status RELEASING = en emisión, FINISHED = terminado, NOT_YET_RELEASED = por estrenar, HIATUS = en pausa) y cita las noticias recientes si las hay. Si el anime no aparece en los resultados, dilo y no afirmes un estado actual como hecho; aclara que tu conocimiento interno puede estar desactualizado.
+- Para preguntas sobre el estado, temporada, emisión o episodios de un anime, responde con los datos de AniList del contexto (status RELEASING = en emisión, FINISHED = terminado, NOT_YET_RELEASED = por estrenar, HIATUS = en pausa) y cita las noticias recientes si las hay. Para "cuándo sale el próximo episodio" usa "próximo episodio" del contexto. Si el anime no aparece en los resultados, dilo y no afirmes un estado actual como hecho; aclara que tu conocimiento interno puede estar desactualizado.
 - Si hay resultados de AniList en el contexto, puedes referirte a ellos (el usuario verá tarjetas visuales de esos resultados).
 - NO limites tus respuestas solo a los resultados de AniList si la pregunta del usuario es más profunda o requiere datos como el nombre del autor, fechas exactas, OVAs, etc. Eres libre de usar tu conocimiento general.
 - Adapta el tono de tu redacción al valor de "tone" que se te indique.
 - No repitas la lista completa de datos de AniList en texto; asume que el usuario las está viendo visualmente.
 - Si la intención es "news", responde SOLO con los titulares de "Noticias recientes" del contexto: resúmelos, menciona el medio y la fecha, e incluye el enlace en formato markdown. No inventes noticias ni detalles que no estén en los titulares. Si no hay titulares o fallaron, dilo con honestidad y no presentes conocimiento interno como noticia actual.
+- Si hay "Detalle de AniList", úsalo para responder "qué ver después", orden de visionado (precuelas/secuelas) y series recomendadas; no inventes entradas que no estén ahí.
 - Si el usuario busca recomendaciones parecidas a una obra, nombra las series que consideres similares usando tu conocimiento, y si coinciden con los resultados de AniList, mucho mejor.`;
 
 export interface BuildReplyInput {
@@ -28,6 +29,7 @@ export interface BuildReplyInput {
   results: AnimeSearchResult;
   news?: NewsItem[];
   newsFailed?: boolean;
+  detail?: AnimeDetail;
 }
 
 function formatResultsForContext(results: AnimeSearchResult): string {
@@ -42,9 +44,22 @@ function formatResultsForContext(results: AnimeSearchResult): string {
       const end = anime.endDate?.year ?? "?";
       const season =
         anime.season && anime.seasonYear ? `${anime.season} ${anime.seasonYear}` : "desconocida";
-      return `- ${title} (${anime.seasonYear ?? "año desconocido"}) — estado AniList: ${anime.status ?? "desconocido"} — formato: ${anime.format ?? "?"} — episodios: ${anime.episodes ?? "?"} — temporada: ${season} — emisión: ${start}-${end} — score: ${score} — géneros: ${genres}`;
+      const next = anime.nextAiringEpisode
+        ? `episodio ${anime.nextAiringEpisode.episode} el ${new Date(anime.nextAiringEpisode.airingAt * 1000).toLocaleString("es", { dateStyle: "long", timeStyle: "short", timeZone: "UTC" })} UTC`
+        : "sin próximo episodio programado";
+      return `- ${title} (${anime.seasonYear ?? "año desconocido"}) — estado AniList: ${anime.status ?? "desconocido"} — formato: ${anime.format ?? "?"} — episodios: ${anime.episodes ?? "?"} — próximo episodio: ${next} — temporada: ${season} — emisión: ${start}-${end} — score: ${score} — géneros: ${genres}`;
     })
     .join("\n");
+}
+
+function formatDetailForContext(detail: AnimeDetail): string {
+  const name = (a: { title: { english: string | null; romaji: string } }) =>
+    a.title.english ?? a.title.romaji;
+  const relations = detail.relations
+    .map((r) => `${r.relationType}: ${name(r)} (${r.seasonYear ?? "?"}, ${r.format ?? "?"})`)
+    .join("; ");
+  const recommendations = detail.recommendations.map(name).join("; ");
+  return `Anime principal: ${name(detail)}\nRelacionados (orden de visionado): ${relations || "ninguno"}\nRecomendados por la comunidad: ${recommendations || "ninguno"}`;
 }
 
 function formatNewsForContext(news: NewsItem[], failed: boolean): string {
@@ -65,6 +80,7 @@ export function buildReply({
   results,
   news = [],
   newsFailed = false,
+  detail,
 }: BuildReplyInput) {
   const context = `Intención detectada: ${intent.intent}
 Tono solicitado: ${intent.tone}
@@ -72,6 +88,8 @@ Filtros: ${JSON.stringify(intent.filters)}
 
 Resultados de AniList:
 ${formatResultsForContext(results)}${
+    detail ? `\n\nDetalle de AniList:\n${formatDetailForContext(detail)}` : ""
+  }${
     intent.intent === "news" || intent.intent === "detail"
       ? `\n\nNoticias recientes (Google News):\n${formatNewsForContext(news, newsFailed)}`
       : ""

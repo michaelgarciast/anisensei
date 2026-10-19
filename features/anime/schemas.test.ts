@@ -1,5 +1,10 @@
 import { expect, test } from "bun:test";
-import { AnimeDetailResponseSchema, cleanAnimeDescription, externalLinkUrl } from "./schemas";
+import {
+  AnimeDetailResponseSchema,
+  cleanAnimeDescription,
+  externalLinkUrl,
+  formatNextEpisode,
+} from "./schemas";
 
 const recommendation = (id: number, type = "ANIME", isAdult = false) => ({
   mediaRecommendation: {
@@ -78,4 +83,43 @@ test("externalLinkUrl devuelve la URL del servicio pedido y es insensible a may�
   );
   expect(externalLinkUrl({ externalLinks }, "Netflix")).toBeNull();
   expect(externalLinkUrl({ externalLinks: null }, "Crunchyroll")).toBeNull();
+});
+
+test("retains only anime relations useful for watch order", () => {
+  const edge = (id: number, relationType: string, type = "ANIME") => ({
+    relationType,
+    node: {
+      id,
+      type,
+      format: "TV",
+      status: "FINISHED",
+      seasonYear: 2020,
+      title: { romaji: `Serie ${id}`, english: null, native: null },
+    },
+  });
+  const result = AnimeDetailResponseSchema.parse({
+    Media: {
+      ...media,
+      recommendations: null,
+      relations: {
+        edges: [
+          null,
+          edge(2, "SEQUEL"),
+          edge(3, "ADAPTATION", "MANGA"),
+          edge(4, "CHARACTER"),
+          edge(5, "PREQUEL"),
+        ],
+      },
+    },
+  });
+  expect(result.relations.map(({ id }) => id)).toEqual([2, 5]);
+});
+
+test("formatNextEpisode muestra la cuenta regresiva en d/h/min", () => {
+  const now = 1_000_000_000_000;
+  const at = (seconds: number) => ({ episode: 5, airingAt: now / 1000 + seconds });
+  expect(formatNextEpisode(null, now)).toBeNull();
+  expect(formatNextEpisode(at(3 * 86400 + 2 * 3600), now)).toBe("Ep. 5 · en 3 d 2 h");
+  expect(formatNextEpisode(at(2 * 3600 + 5 * 60), now)).toBe("Ep. 5 · en 2 h 5 min");
+  expect(formatNextEpisode(at(-10), now)).toBe("Ep. 5 · en 0 min");
 });
