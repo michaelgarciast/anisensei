@@ -1,16 +1,22 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, mock, test } from "bun:test";
 
-const empty = {
+const empty: { data: unknown[]; pagination: object } = {
   data: [],
   pagination: { last_page: 1, has_next_page: false, total: 0, current_page: 1 },
 };
 const anime = { id: 7, title: { romaji: "Serie", english: null, native: null }, genres: [] };
 
 let intent: Record<string, unknown>;
-const searchAnime = mock(async (_filters: unknown) => ({ ...empty, data: [anime] }));
-const getSeasonalAnime = mock(async (_options: unknown) => ({ ...empty, data: [anime] }));
-const getAnimeById = mock(async (_id: number) => ({ id: 7 }));
-const buildReply = mock((_input: unknown) => ({
+const searchAnime = mock<(arg: unknown) => Promise<typeof empty>>(async () => ({
+  ...empty,
+  data: [anime],
+}));
+const getSeasonalAnime = mock<(arg: unknown) => Promise<typeof empty>>(async () => ({
+  ...empty,
+  data: [anime],
+}));
+const getAnimeById = mock<(id: number) => Promise<{ id: number }>>(async () => ({ id: 7 }));
+const buildReply = mock<(input: unknown) => { stream: ReadableStream }>(() => ({
   stream: new ReadableStream({ start: (c) => c.close() }),
 }));
 
@@ -36,7 +42,8 @@ const request = async (text = "hola") => {
   return response;
 };
 
-const lastReplyInput = () => buildReply.mock.calls.at(-1)![0] as Record<string, any>;
+const lastReplyInput = () =>
+  buildReply.mock.calls.at(-1)![0] as { results: { data: unknown[] }; detail: unknown };
 
 const originalFetch = globalThis.fetch;
 beforeAll(() => {
