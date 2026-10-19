@@ -1,5 +1,10 @@
 import { expect, test } from "bun:test";
-import { AnimeDetailResponseSchema, cleanAnimeDescription, externalLinkUrl } from "./schemas";
+import {
+  AnimeDetailResponseSchema,
+  cleanAnimeDescription,
+  externalLinkUrl,
+  formatNextEpisode,
+} from "./schemas";
 
 const recommendation = (id: number, type = "ANIME", isAdult = false) => ({
   mediaRecommendation: {
@@ -108,4 +113,13 @@ test("retains only anime relations useful for watch order", () => {
     },
   });
   expect(result.relations.map(({ id }) => id)).toEqual([2, 5]);
+});
+
+test("formatNextEpisode muestra la cuenta regresiva en d/h/min", () => {
+  const now = 1_000_000_000_000;
+  const at = (seconds: number) => ({ episode: 5, airingAt: now / 1000 + seconds });
+  expect(formatNextEpisode(null, now)).toBeNull();
+  expect(formatNextEpisode(at(3 * 86400 + 2 * 3600), now)).toBe("Ep. 5 · en 3 d 2 h");
+  expect(formatNextEpisode(at(2 * 3600 + 5 * 60), now)).toBe("Ep. 5 · en 2 h 5 min");
+  expect(formatNextEpisode(at(-10), now)).toBe("Ep. 5 · en 0 min");
 });

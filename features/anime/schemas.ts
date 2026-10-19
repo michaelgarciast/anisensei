@@ -210,6 +210,24 @@ export function animeTrailerEmbedUrl(anime: Pick<Anime, "trailer">): string | nu
   return `https://www.youtube.com/embed/${trailer.id}`;
 }
 
+/** Texto corto del próximo episodio, p. ej. "Ep. 5 · en 3 d"; null si no hay uno programado. */
+export function formatNextEpisode(
+  next: { episode: number; airingAt: number } | null | undefined,
+  nowMs: number,
+): string | null {
+  if (!next) return null;
+  const minutes = Math.max(0, Math.floor((next.airingAt * 1000 - nowMs) / 60_000));
+  const days = Math.floor(minutes / 1440);
+  const hours = Math.floor((minutes % 1440) / 60);
+  const eta =
+    days > 0
+      ? `${days} d ${hours} h`
+      : hours > 0
+        ? `${hours} h ${minutes % 60} min`
+        : `${minutes} min`;
+  return `Ep. ${next.episode} · en ${eta}`;
+}
+
 /** Nombre del estudio principal de animación. */
 export function mainStudioName(anime: Anime): string | null {
   return anime.studios?.nodes[0]?.name ?? null;
