@@ -87,6 +87,11 @@ export const AnimeSchema = z.object({
   trailer: z
     .object({ id: z.string(), site: z.string(), thumbnail: z.string().nullable() })
     .nullable(),
+  /** Próximo episodio por emitir (airingAt en segundos UNIX); null si no está en emisión. */
+  nextAiringEpisode: z
+    .object({ episode: z.number(), airingAt: z.number() })
+    .nullable()
+    .optional(),
   /** Enlaces externos (streaming, webs oficiales…); solo se pide en la consulta de detalle. */
   externalLinks: z
     .array(z.object({ url: z.string(), site: z.string() }))

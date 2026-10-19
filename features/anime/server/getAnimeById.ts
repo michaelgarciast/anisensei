@@ -52,6 +52,10 @@ const ANIME_DETAIL_QUERY = /* GraphQL */ `
         site
         thumbnail
       }
+      nextAiringEpisode {
+        episode
+        airingAt
+      }
       externalLinks {
         url
         site
@@ -117,6 +121,6 @@ export const getAnimeById = unstable_cache(
 
     return AnimeDetailResponseSchema.parse(raw);
   },
-  ["anime-detail-with-external-links"],
+  ["anime-detail-with-airing"],
   { revalidate: 3600 },
 );

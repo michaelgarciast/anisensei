@@ -81,6 +81,10 @@ const SEASONAL_ANIME_QUERY = /* GraphQL */ `
           site
           thumbnail
         }
+        nextAiringEpisode {
+          episode
+          airingAt
+        }
       }
     }
   }
